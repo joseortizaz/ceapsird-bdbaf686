@@ -18,6 +18,7 @@ import {
   Clock, Calendar, Users, GraduationCap, CheckCircle2, Video, Link2, MessageCircle,
 } from "lucide-react";
 import { SITE_URL, programaUrl, plainExcerpt } from "@/lib/site";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ProgramReviews } from "@/components/reviews/ProgramReviews";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -462,7 +463,7 @@ function DetallePrograma() {
             <div>
               <h2 className="text-2xl font-bold">Contenido del programa</h2>
               {programa.tipo === "diplomado" && courseModules.length > 0 ? (
-                <div className="mt-4 space-y-4">
+                <Accordion type="multiple" className="mt-4 space-y-4">
                   {courseModules.map((cm, idx) => {
                     const leccionesMod = modulos.filter((m) => m.modulo_id === cm.id);
                     const docentesMod = Array.from(
@@ -470,62 +471,86 @@ function DetallePrograma() {
                     )
                       .map((id) => docentePorId.get(id))
                       .filter(Boolean) as Teacher[];
+                    const totalMin = leccionesMod.reduce(
+                      (acc, m) => acc + (m.duracion_minutos ?? 0),
+                      0,
+                    );
+                    const hayDuraciones = leccionesMod.some((m) => m.duracion_minutos);
+                    const duracionTexto = hayDuraciones
+                      ? totalMin >= 60
+                        ? `${Math.floor(totalMin / 60)} h ${totalMin % 60} min`
+                        : `${totalMin} min`
+                      : null;
                     return (
-                      <div key={cm.id} className="rounded-lg border bg-card">
-                        <div className="border-b bg-muted/40 px-4 py-3">
-                          <h3 className="font-bold">
-                            Módulo {idx + 1}: {cm.titulo}
-                          </h3>
-                          {cm.descripcion && (
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              {plainExcerpt(cm.descripcion, 200)}
+                      <AccordionItem
+                        key={cm.id}
+                        value={cm.id}
+                        className="rounded-lg border bg-card overflow-hidden border-b-0 last:border-b-0"
+                      >
+                        <AccordionTrigger className="bg-muted/40 px-4 py-3 text-left hover:no-underline items-start">
+                          <div className="flex-1">
+                            <h3 className="font-bold">
+                              Módulo {idx + 1}: {cm.titulo}
+                            </h3>
+                            {cm.descripcion && (
+                              <p className="mt-1 text-sm text-muted-foreground font-normal">
+                                {plainExcerpt(cm.descripcion, 200)}
+                              </p>
+                            )}
+                            <p className="mt-1 text-xs text-muted-foreground font-normal">
+                              {leccionesMod.length === 1
+                                ? "1 lección"
+                                : `${leccionesMod.length} lecciones`}
+                              {duracionTexto && ` · ${duracionTexto}`}
                             </p>
-                          )}
-                          {docentesMod.length > 0 && (
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              Docentes del módulo:{" "}
-                              {docentesMod.map((d, i) => (
-                                <span key={d.id}>
-                                  {i > 0 && ", "}
-                                  {botonDocente(d, "text-xs")}
-                                </span>
-                              ))}
-                            </p>
-                          )}
-                        </div>
-                        {leccionesMod.length === 0 ? (
-                          <p className="px-4 py-3 text-sm text-muted-foreground">Próximamente</p>
-                        ) : (
-                          <ol className="divide-y">
-                            {leccionesMod.map((m, i) => (
-                              <li key={m.id} className="flex items-start gap-3 p-4">
-                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                                  {i + 1}
-                                </span>
-                                <div className="flex-1">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="font-semibold">{m.titulo}</h4>
-                                    {m.es_en_vivo && (
-                                      <Badge variant="outline" className="gap-1">
-                                        <Video className="h-3 w-3" /> En vivo
-                                      </Badge>
-                                    )}
-                                    {m.duracion_minutos && (
-                                      <span className="text-xs text-muted-foreground">
-                                        {m.duracion_minutos} min
-                                      </span>
-                                    )}
-                                  </div>
-                                  {lineaDocenteLeccion(m.docente_id)}
-                                </div>
-                              </li>
+                          </div>
+                        </AccordionTrigger>
+                        {docentesMod.length > 0 && (
+                          <div className="bg-muted/40 px-4 pb-3 -mt-1 text-xs text-muted-foreground">
+                            Docentes del módulo:{" "}
+                            {docentesMod.map((d, i) => (
+                              <span key={d.id}>
+                                {i > 0 && ", "}
+                                {botonDocente(d, "text-xs")}
+                              </span>
                             ))}
-                          </ol>
+                          </div>
                         )}
-                      </div>
+                        <AccordionContent className="pb-0">
+                          {leccionesMod.length === 0 ? (
+                            <p className="px-4 py-3 text-sm text-muted-foreground">Próximamente</p>
+                          ) : (
+                            <ol className="divide-y border-t">
+                              {leccionesMod.map((m, i) => (
+                                <li key={m.id} className="flex items-start gap-3 p-4">
+                                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                                    {i + 1}
+                                  </span>
+                                  <div className="flex-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <h4 className="font-semibold">{m.titulo}</h4>
+                                      {m.es_en_vivo && (
+                                        <Badge variant="outline" className="gap-1">
+                                          <Video className="h-3 w-3" /> En vivo
+                                        </Badge>
+                                      )}
+                                      {m.duracion_minutos && (
+                                        <span className="text-xs text-muted-foreground">
+                                          {m.duracion_minutos} min
+                                        </span>
+                                      )}
+                                    </div>
+                                    {lineaDocenteLeccion(m.docente_id)}
+                                  </div>
+                                </li>
+                              ))}
+                            </ol>
+                          )}
+                        </AccordionContent>
+                      </AccordionItem>
                     );
                   })}
-                </div>
+                </Accordion>
               ) : (
                 <ol className="mt-4 divide-y rounded-lg border bg-card">
                   {modulos.map((m, i) => (
