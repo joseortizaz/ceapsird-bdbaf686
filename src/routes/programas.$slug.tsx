@@ -154,13 +154,13 @@ function DetallePrograma() {
   };
 
 
-  type ModuloCatalog = { id: string; titulo: string; descripcion: string | null; orden: number; duracion_minutos: number | null; es_en_vivo: boolean | null; fecha_sesion: string | null; modulo_id: string | null; docente_id: string | null };
+  type ModuloCatalog = { id: string; titulo: string; orden: number; duracion_minutos: number | null; es_en_vivo: boolean | null; fecha_sesion: string | null; modulo_id: string | null; docente_id: string | null };
   const { data: modulos = [] } = useQuery<ModuloCatalog[]>({
     queryKey: ["public", "modulos", programa?.id],
     enabled: !!programa?.id,
     queryFn: async () => {
       const { data, error } = await (supabase.from as any)("program_modules_catalog")
-        .select("id,titulo,descripcion,orden,duracion_minutos,es_en_vivo,fecha_sesion,modulo_id,docente_id")
+        .select("id,titulo,orden,duracion_minutos,es_en_vivo,fecha_sesion,modulo_id,docente_id")
         .eq("programa_id", programa!.id)
         .order("orden");
       if (error) throw error;
@@ -477,7 +477,9 @@ function DetallePrograma() {
                             Módulo {idx + 1}: {cm.titulo}
                           </h3>
                           {cm.descripcion && (
-                            <p className="mt-1 text-sm text-muted-foreground">{cm.descripcion}</p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {plainExcerpt(cm.descripcion, 200)}
+                            </p>
                           )}
                           {docentesMod.length > 0 && (
                             <p className="mt-1 text-xs text-muted-foreground">
@@ -514,9 +516,6 @@ function DetallePrograma() {
                                       </span>
                                     )}
                                   </div>
-                                  {m.descripcion && (
-                                    <p className="mt-1 text-sm text-muted-foreground">{m.descripcion}</p>
-                                  )}
                                   {lineaDocenteLeccion(m.docente_id)}
                                 </div>
                               </li>
@@ -548,9 +547,6 @@ function DetallePrograma() {
                             </span>
                           )}
                         </div>
-                        {m.descripcion && (
-                          <p className="mt-1 text-sm text-muted-foreground">{m.descripcion}</p>
-                        )}
                         {lineaDocenteLeccion(m.docente_id)}
                       </div>
                     </li>

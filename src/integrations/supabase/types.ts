@@ -2287,7 +2287,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          descripcion?: string | null
+          descripcion?: never
           docente_id?: string | null
           duracion_minutos?: number | null
           es_en_vivo?: boolean | null
@@ -2301,7 +2301,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          descripcion?: string | null
+          descripcion?: never
           docente_id?: string | null
           duracion_minutos?: number | null
           es_en_vivo?: boolean | null
