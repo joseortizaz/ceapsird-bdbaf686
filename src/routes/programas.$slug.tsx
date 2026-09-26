@@ -477,7 +477,9 @@ function DetallePrograma() {
                             Módulo {idx + 1}: {cm.titulo}
                           </h3>
                           {cm.descripcion && (
-                            <p className="mt-1 text-sm text-muted-foreground">{cm.descripcion}</p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {plainExcerpt(cm.descripcion, 200)}
+                            </p>
                           )}
                           {docentesMod.length > 0 && (
                             <p className="mt-1 text-xs text-muted-foreground">
@@ -514,9 +516,6 @@ function DetallePrograma() {
                                       </span>
                                     )}
                                   </div>
-                                  {m.descripcion && (
-                                    <p className="mt-1 text-sm text-muted-foreground">{m.descripcion}</p>
-                                  )}
                                   {lineaDocenteLeccion(m.docente_id)}
                                 </div>
                               </li>
@@ -548,9 +547,6 @@ function DetallePrograma() {
                             </span>
                           )}
                         </div>
-                        {m.descripcion && (
-                          <p className="mt-1 text-sm text-muted-foreground">{m.descripcion}</p>
-                        )}
                         {lineaDocenteLeccion(m.docente_id)}
                       </div>
                     </li>
